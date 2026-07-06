@@ -12,6 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardPredictRouteImport } from './routes/dashboard.predict'
+import { Route as DashboardPerformanceRouteImport } from './routes/dashboard.performance'
+import { Route as DashboardMlopsRouteImport } from './routes/dashboard.mlops'
+import { Route as DashboardExplainableRouteImport } from './routes/dashboard.explainable'
+import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
+import { Route as DashboardAboutRouteImport } from './routes/dashboard.about'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -28,28 +34,103 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardPredictRoute = DashboardPredictRouteImport.update({
+  id: '/predict',
+  path: '/predict',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPerformanceRoute = DashboardPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMlopsRoute = DashboardMlopsRouteImport.update({
+  id: '/mlops',
+  path: '/mlops',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardExplainableRoute = DashboardExplainableRouteImport.update({
+  id: '/explainable',
+  path: '/explainable',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAboutRoute = DashboardAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard' | '/dashboard/'
+  to:
+    | '/'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -80,14 +161,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/predict': {
+      id: '/dashboard/predict'
+      path: '/predict'
+      fullPath: '/dashboard/predict'
+      preLoaderRoute: typeof DashboardPredictRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/performance': {
+      id: '/dashboard/performance'
+      path: '/performance'
+      fullPath: '/dashboard/performance'
+      preLoaderRoute: typeof DashboardPerformanceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/mlops': {
+      id: '/dashboard/mlops'
+      path: '/mlops'
+      fullPath: '/dashboard/mlops'
+      preLoaderRoute: typeof DashboardMlopsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/explainable': {
+      id: '/dashboard/explainable'
+      path: '/explainable'
+      fullPath: '/dashboard/explainable'
+      preLoaderRoute: typeof DashboardExplainableRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/analytics': {
+      id: '/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/about': {
+      id: '/dashboard/about'
+      path: '/about'
+      fullPath: '/dashboard/about'
+      preLoaderRoute: typeof DashboardAboutRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardAboutRoute: typeof DashboardAboutRoute
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardExplainableRoute: typeof DashboardExplainableRoute
+  DashboardMlopsRoute: typeof DashboardMlopsRoute
+  DashboardPerformanceRoute: typeof DashboardPerformanceRoute
+  DashboardPredictRoute: typeof DashboardPredictRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAboutRoute: DashboardAboutRoute,
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardExplainableRoute: DashboardExplainableRoute,
+  DashboardMlopsRoute: DashboardMlopsRoute,
+  DashboardPerformanceRoute: DashboardPerformanceRoute,
+  DashboardPredictRoute: DashboardPredictRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
