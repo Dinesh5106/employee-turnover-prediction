@@ -9,38 +9,164 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardPredictRouteImport } from './routes/dashboard.predict'
+import { Route as DashboardPerformanceRouteImport } from './routes/dashboard.performance'
+import { Route as DashboardMlopsRouteImport } from './routes/dashboard.mlops'
+import { Route as DashboardExplainableRouteImport } from './routes/dashboard.explainable'
+import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
+import { Route as DashboardAboutRouteImport } from './routes/dashboard.about'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPredictRoute = DashboardPredictRouteImport.update({
+  id: '/predict',
+  path: '/predict',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPerformanceRoute = DashboardPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMlopsRoute = DashboardMlopsRouteImport.update({
+  id: '/mlops',
+  path: '/mlops',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardExplainableRoute = DashboardExplainableRouteImport.update({
+  id: '/explainable',
+  path: '/explainable',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAboutRoute = DashboardAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/dashboard/about': typeof DashboardAboutRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/explainable': typeof DashboardExplainableRoute
+  '/dashboard/mlops': typeof DashboardMlopsRoute
+  '/dashboard/performance': typeof DashboardPerformanceRoute
+  '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/sitemap.xml'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/sitemap.xml'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/sitemap.xml'
+    | '/dashboard/about'
+    | '/dashboard/analytics'
+    | '/dashboard/explainable'
+    | '/dashboard/mlops'
+    | '/dashboard/performance'
+    | '/dashboard/predict'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +174,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/predict': {
+      id: '/dashboard/predict'
+      path: '/predict'
+      fullPath: '/dashboard/predict'
+      preLoaderRoute: typeof DashboardPredictRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/performance': {
+      id: '/dashboard/performance'
+      path: '/performance'
+      fullPath: '/dashboard/performance'
+      preLoaderRoute: typeof DashboardPerformanceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/mlops': {
+      id: '/dashboard/mlops'
+      path: '/mlops'
+      fullPath: '/dashboard/mlops'
+      preLoaderRoute: typeof DashboardMlopsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/explainable': {
+      id: '/dashboard/explainable'
+      path: '/explainable'
+      fullPath: '/dashboard/explainable'
+      preLoaderRoute: typeof DashboardExplainableRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/analytics': {
+      id: '/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/about': {
+      id: '/dashboard/about'
+      path: '/about'
+      fullPath: '/dashboard/about'
+      preLoaderRoute: typeof DashboardAboutRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardAboutRoute: typeof DashboardAboutRoute
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardExplainableRoute: typeof DashboardExplainableRoute
+  DashboardMlopsRoute: typeof DashboardMlopsRoute
+  DashboardPerformanceRoute: typeof DashboardPerformanceRoute
+  DashboardPredictRoute: typeof DashboardPredictRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAboutRoute: DashboardAboutRoute,
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardExplainableRoute: DashboardExplainableRoute,
+  DashboardMlopsRoute: DashboardMlopsRoute,
+  DashboardPerformanceRoute: DashboardPerformanceRoute,
+  DashboardPredictRoute: DashboardPredictRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
