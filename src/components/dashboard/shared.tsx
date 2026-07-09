@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
+import type { ReactNode, CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 export function PageHeader({
@@ -42,5 +42,29 @@ export function GlassCard({ children, className, delay = 0 }: { children: ReactN
     >
       {children}
     </motion.div>
+  );
+}
+
+export function tooltipStyle(): CSSProperties {
+  return {
+    background: "var(--color-popover)",
+    border: "1px solid var(--color-border)",
+    borderRadius: 12,
+    fontSize: 12,
+    boxShadow: "var(--shadow-card)",
+    color: "var(--color-popover-foreground)",
+  };
+}
+
+export function RiskBadge({ risk }: { risk: string }) {
+  const map: Record<string, string> = {
+    Low: "bg-[color:var(--success)]/15 text-[color:var(--success)] border-[color:var(--success)]/30",
+    Medium: "bg-[color:var(--warning)]/15 text-[color:var(--warning)] border-[color:var(--warning)]/30",
+    High: "bg-destructive/15 text-destructive border-destructive/30",
+  };
+  return (
+    <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${map[risk] ?? ""}`}>
+      {risk}
+    </span>
   );
 }

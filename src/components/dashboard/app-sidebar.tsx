@@ -1,15 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, UserCheck, BarChart3, Activity, GitBranch, Info, Sparkles, Settings,
+  Upload, Play, Users,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
 
+const dataNav = [
+  { title: "Dataset Upload", url: "/dashboard/upload", icon: Upload },
+  { title: "Train Model", url: "/dashboard/train", icon: Play },
+];
+
 const nav = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Predict", url: "/dashboard/predict", icon: UserCheck },
+  { title: "Batch Predict", url: "/dashboard/batch", icon: Users },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Model Performance", url: "/dashboard/performance", icon: Activity },
   { title: "Explainable AI", url: "/dashboard/explainable", icon: Sparkles },
@@ -40,22 +47,37 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Data & Models</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {dataNav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={currentPath === item.url} tooltip={item.title}>
+                    <Link to={item.url} className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {nav.map((item) => {
-                const active = currentPath === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                      <Link to={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {nav.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={currentPath === item.url} tooltip={item.title}>
+                    <Link to={item.url} className="flex items-center gap-3">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
