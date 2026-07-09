@@ -1,152 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BarChart3, Loader2 } from "lucide-react";
 import {
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
-  ScatterChart, Scatter, ZAxis, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  LineChart, Line, PieChart, Pie, Cell,
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
 } from "recharts";
-import { BarChart3 } from "lucide-react";
-import { GlassCard, PageHeader } from "@/components/dashboard/shared";
-import { tooltipStyle } from "./dashboard.index";
-import {
-  departmentAttrition, ageDistribution, salaryVsAttrition, overtimeData,
-  satisfactionData, performanceData, workLifeBalance,
-} from "@/lib/mock-data";
+import { GlassCard, PageHeader, tooltipStyle } from "@/components/dashboard/shared";
+import { EmptyState, ErrorState } from "@/components/dashboard/empty-state";
+import { useAnalytics } from "@/hooks/use-api";
 
 export const Route = createFileRoute("/dashboard/analytics")({
   head: () => ({ meta: [{ title: "Analytics — TurnoverAI" }] }),
-  component: AnalyticsPage,
+  component: Analytics,
 });
 
-const PIE = ["#22C55E", "#7C3AED", "#2563EB", "#F59E0B"];
+const PIE = ["#2563EB", "#7C3AED", "#22C55E", "#F59E0B", "#EF4444", "#06B6D4"];
 
-function AnalyticsPage() {
+function Analytics() {
+  const q = useAnalytics();
+  if (q.isLoading) return <div className="flex items-center py-24 justify-center text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Loading analytics…</div>;
+  if (q.isError) {
+    const msg = (q.error as Error).message;
+    if (msg.toLowerCase().includes("no dataset")) return <><PageHeader title="Analytics" icon={<BarChart3 className="h-5 w-5"/>}/><EmptyState /></>;
+    return <ErrorState message={msg} />;
+  }
+  const a = q.data!;
   return (
     <>
-      <PageHeader
-        title="Workforce Analytics"
-        description="Interactive dashboards exploring the drivers behind employee turnover."
-        icon={<BarChart3 className="h-5 w-5" />}
-      />
+      <PageHeader title="Analytics" description="Live distributions and attrition breakdowns from your dataset." icon={<BarChart3 className="h-5 w-5" />} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <GlassCard>
-          <ChartHeader title="Department-wise Attrition" sub="Retained vs churned by team" />
+          <h3 className="mb-4 text-sm font-semibold">Age Distribution</h3>
           <div className="h-64">
             <ResponsiveContainer>
-              <BarChart data={departmentAttrition} barSize={18}>
+              <BarChart data={a.age}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false}/>
-                <XAxis dataKey="name" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis tick={axisTick} axisLine={false} tickLine={false}/>
+                <XAxis dataKey="age" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
+                <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
                 <Tooltip contentStyle={tooltipStyle()} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
-                <Bar dataKey="retained" fill="#2563EB" radius={[6,6,0,0]} />
-                <Bar dataKey="attrition" fill="#EF4444" radius={[6,6,0,0]} />
+                <Bar dataKey="count" fill="#7C3AED" radius={[6,6,0,0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </GlassCard>
 
         <GlassCard delay={0.05}>
-          <ChartHeader title="Age Distribution" sub="Employees across age bands" />
-          <div className="h-64">
-            <ResponsiveContainer>
-              <BarChart data={ageDistribution}>
-                <defs>
-                  <linearGradient id="ageG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7C3AED" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.7}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false}/>
-                <XAxis dataKey="age" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis tick={axisTick} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={tooltipStyle()} />
-                <Bar dataKey="count" fill="url(#ageG)" radius={[8,8,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard delay={0.1}>
-          <ChartHeader title="Salary vs Tenure" sub="Attrition markers overlaid" />
-          <div className="h-64">
-            <ResponsiveContainer>
-              <ScatterChart>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                <XAxis type="number" dataKey="salary" name="Salary (k)" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis type="number" dataKey="tenure" name="Tenure (yrs)" tick={axisTick} axisLine={false} tickLine={false}/>
-                <ZAxis range={[40, 120]} />
-                <Tooltip contentStyle={tooltipStyle()} cursor={{ strokeDasharray: "3 3" }} />
-                <Scatter data={salaryVsAttrition.filter(d=>!d.attrition)} fill="#2563EB" name="Retained"/>
-                <Scatter data={salaryVsAttrition.filter(d=>d.attrition)} fill="#EF4444" name="Attrition"/>
-                <Legend wrapperStyle={{ fontSize: 11 }}/>
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard delay={0.15}>
-          <ChartHeader title="Overtime Analysis" sub="Impact of overtime on retention" />
-          <div className="h-64">
-            <ResponsiveContainer>
-              <BarChart data={overtimeData} layout="vertical" barSize={30}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false}/>
-                <XAxis type="number" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis type="category" dataKey="name" tick={axisTick} axisLine={false} tickLine={false} width={110}/>
-                <Tooltip contentStyle={tooltipStyle()} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
-                <Bar dataKey="retained" stackId="a" fill="#2563EB" radius={[0,0,0,0]} />
-                <Bar dataKey="attrition" stackId="a" fill="#EF4444" radius={[0,6,6,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard delay={0.2}>
-          <ChartHeader title="Job Satisfaction Analysis" sub="Attrition rate by satisfaction level" />
-          <div className="h-64">
-            <ResponsiveContainer>
-              <LineChart data={satisfactionData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false}/>
-                <XAxis dataKey="level" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis tick={axisTick} axisLine={false} tickLine={false}/>
-                <Tooltip contentStyle={tooltipStyle()} />
-                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
-                <Line type="monotone" dataKey="attritionRate" stroke="#EF4444" strokeWidth={3} dot={{ r: 5, fill: "#EF4444" }} name="Attrition Rate %" />
-                <Line type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={3} dot={{ r: 5, fill: "#2563EB" }} name="Employees"/>
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard delay={0.25}>
-          <ChartHeader title="Promotion Analysis" sub="Time-since-promotion vs risk (radar)" />
-          <div className="h-64">
-            <ResponsiveContainer>
-              <RadarChart data={[
-                { metric: "0-1y", value: 82 },
-                { metric: "1-2y", value: 65 },
-                { metric: "2-3y", value: 48 },
-                { metric: "3-5y", value: 62 },
-                { metric: "5y+", value: 78 },
-              ]}>
-                <PolarGrid stroke="var(--color-border)" />
-                <PolarAngleAxis dataKey="metric" tick={axisTick}/>
-                <PolarRadiusAxis tick={axisTick}/>
-                <Tooltip contentStyle={tooltipStyle()} />
-                <Radar name="Retention Score" dataKey="value" stroke="#7C3AED" fill="#7C3AED" fillOpacity={0.35} strokeWidth={2}/>
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-
-        <GlassCard delay={0.3}>
-          <ChartHeader title="Work-Life Balance" sub="Distribution across the workforce" />
+          <h3 className="mb-4 text-sm font-semibold">Gender Distribution</h3>
           <div className="h-64">
             <ResponsiveContainer>
               <PieChart>
-                <Pie data={workLifeBalance} dataKey="value" nameKey="level" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                  {workLifeBalance.map((_, i) => <Cell key={i} fill={PIE[i % PIE.length]} />)}
+                <Pie data={a.gender} dataKey="value" nameKey="name" outerRadius={90} label>
+                  {a.gender.map((_, i) => <Cell key={i} fill={PIE[i % PIE.length]} />)}
                 </Pie>
                 <Tooltip contentStyle={tooltipStyle()} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
@@ -155,38 +59,58 @@ function AnalyticsPage() {
           </div>
         </GlassCard>
 
-        <GlassCard delay={0.35}>
-          <ChartHeader title="Performance Rating Distribution" sub="Rating 1 (low) to 5 (top)" />
+        <GlassCard delay={0.1}>
+          <h3 className="mb-4 text-sm font-semibold">Job Satisfaction vs Attrition</h3>
           <div className="h-64">
             <ResponsiveContainer>
-              <BarChart data={performanceData}>
-                <defs>
-                  <linearGradient id="perfG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22C55E" stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.6}/>
-                  </linearGradient>
-                </defs>
+              <BarChart data={a.satisfaction}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false}/>
-                <XAxis dataKey="rating" tick={axisTick} axisLine={false} tickLine={false}/>
-                <YAxis tick={axisTick} axisLine={false} tickLine={false}/>
+                <XAxis dataKey="level" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
+                <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
                 <Tooltip contentStyle={tooltipStyle()} />
-                <Bar dataKey="count" fill="url(#perfG)" radius={[8,8,0,0]} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
+                <Bar yAxisId="l" dataKey="count" fill="#2563EB" radius={[6,6,0,0]} name="Employees"/>
+                <Bar yAxisId="r" dataKey="attritionRate" fill="#EF4444" radius={[6,6,0,0]} name="Attrition %"/>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </GlassCard>
+
+        <GlassCard delay={0.15}>
+          <h3 className="mb-4 text-sm font-semibold">Overtime Analysis</h3>
+          <div className="h-64">
+            <ResponsiveContainer>
+              <BarChart data={a.overtime}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false}/>
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
+                <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} axisLine={false} tickLine={false}/>
+                <Tooltip contentStyle={tooltipStyle()} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }}/>
+                <Bar dataKey="retained" stackId="a" fill="#22C55E" />
+                <Bar dataKey="attrition" stackId="a" fill="#EF4444" radius={[6,6,0,0]}/>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+
+        {a.featureImportance.length > 0 && (
+          <GlassCard delay={0.2} className="lg:col-span-2">
+            <h3 className="mb-4 text-sm font-semibold">Feature Importance Radar</h3>
+            <div className="h-72">
+              <ResponsiveContainer>
+                <RadarChart data={a.featureImportance.slice(0, 8)}>
+                  <PolarGrid stroke="var(--color-border)"/>
+                  <PolarAngleAxis dataKey="feature" tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}/>
+                  <PolarRadiusAxis tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}/>
+                  <Radar dataKey="importance" stroke="#7C3AED" fill="#7C3AED" fillOpacity={0.35}/>
+                  <Tooltip contentStyle={tooltipStyle()} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
+        )}
       </div>
     </>
-  );
-}
-
-const axisTick = { fontSize: 11, fill: "var(--color-muted-foreground)" };
-
-function ChartHeader({ title, sub }: { title: string; sub: string }) {
-  return (
-    <div className="mb-4">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <p className="text-xs text-muted-foreground">{sub}</p>
-    </div>
   );
 }
