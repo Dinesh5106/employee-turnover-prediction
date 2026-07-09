@@ -13,10 +13,13 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardUploadRouteImport } from './routes/dashboard.upload'
+import { Route as DashboardTrainRouteImport } from './routes/dashboard.train'
 import { Route as DashboardPredictRouteImport } from './routes/dashboard.predict'
 import { Route as DashboardPerformanceRouteImport } from './routes/dashboard.performance'
 import { Route as DashboardMlopsRouteImport } from './routes/dashboard.mlops'
 import { Route as DashboardExplainableRouteImport } from './routes/dashboard.explainable'
+import { Route as DashboardBatchRouteImport } from './routes/dashboard.batch'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as DashboardAboutRouteImport } from './routes/dashboard.about'
 
@@ -40,6 +43,16 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardUploadRoute = DashboardUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTrainRoute = DashboardTrainRouteImport.update({
+  id: '/train',
+  path: '/train',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardPredictRoute = DashboardPredictRouteImport.update({
   id: '/predict',
   path: '/predict',
@@ -60,6 +73,11 @@ const DashboardExplainableRoute = DashboardExplainableRouteImport.update({
   path: '/explainable',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardBatchRoute = DashboardBatchRouteImport.update({
+  id: '/batch',
+  path: '/batch',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -77,10 +95,13 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/about': typeof DashboardAboutRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/batch': typeof DashboardBatchRoute
   '/dashboard/explainable': typeof DashboardExplainableRoute
   '/dashboard/mlops': typeof DashboardMlopsRoute
   '/dashboard/performance': typeof DashboardPerformanceRoute
   '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard/train': typeof DashboardTrainRoute
+  '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
@@ -88,10 +109,13 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/about': typeof DashboardAboutRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/batch': typeof DashboardBatchRoute
   '/dashboard/explainable': typeof DashboardExplainableRoute
   '/dashboard/mlops': typeof DashboardMlopsRoute
   '/dashboard/performance': typeof DashboardPerformanceRoute
   '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard/train': typeof DashboardTrainRoute
+  '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -101,10 +125,13 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/dashboard/about': typeof DashboardAboutRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/batch': typeof DashboardBatchRoute
   '/dashboard/explainable': typeof DashboardExplainableRoute
   '/dashboard/mlops': typeof DashboardMlopsRoute
   '/dashboard/performance': typeof DashboardPerformanceRoute
   '/dashboard/predict': typeof DashboardPredictRoute
+  '/dashboard/train': typeof DashboardTrainRoute
+  '/dashboard/upload': typeof DashboardUploadRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -115,10 +142,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard/about'
     | '/dashboard/analytics'
+    | '/dashboard/batch'
     | '/dashboard/explainable'
     | '/dashboard/mlops'
     | '/dashboard/performance'
     | '/dashboard/predict'
+    | '/dashboard/train'
+    | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -126,10 +156,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard/about'
     | '/dashboard/analytics'
+    | '/dashboard/batch'
     | '/dashboard/explainable'
     | '/dashboard/mlops'
     | '/dashboard/performance'
     | '/dashboard/predict'
+    | '/dashboard/train'
+    | '/dashboard/upload'
     | '/dashboard'
   id:
     | '__root__'
@@ -138,10 +171,13 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/dashboard/about'
     | '/dashboard/analytics'
+    | '/dashboard/batch'
     | '/dashboard/explainable'
     | '/dashboard/mlops'
     | '/dashboard/performance'
     | '/dashboard/predict'
+    | '/dashboard/train'
+    | '/dashboard/upload'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -181,6 +217,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/upload': {
+      id: '/dashboard/upload'
+      path: '/upload'
+      fullPath: '/dashboard/upload'
+      preLoaderRoute: typeof DashboardUploadRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/train': {
+      id: '/dashboard/train'
+      path: '/train'
+      fullPath: '/dashboard/train'
+      preLoaderRoute: typeof DashboardTrainRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/predict': {
       id: '/dashboard/predict'
       path: '/predict'
@@ -209,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardExplainableRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/batch': {
+      id: '/dashboard/batch'
+      path: '/batch'
+      fullPath: '/dashboard/batch'
+      preLoaderRoute: typeof DashboardBatchRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/analytics': {
       id: '/dashboard/analytics'
       path: '/analytics'
@@ -229,20 +286,26 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardAboutRoute: typeof DashboardAboutRoute
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardBatchRoute: typeof DashboardBatchRoute
   DashboardExplainableRoute: typeof DashboardExplainableRoute
   DashboardMlopsRoute: typeof DashboardMlopsRoute
   DashboardPerformanceRoute: typeof DashboardPerformanceRoute
   DashboardPredictRoute: typeof DashboardPredictRoute
+  DashboardTrainRoute: typeof DashboardTrainRoute
+  DashboardUploadRoute: typeof DashboardUploadRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAboutRoute: DashboardAboutRoute,
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardBatchRoute: DashboardBatchRoute,
   DashboardExplainableRoute: DashboardExplainableRoute,
   DashboardMlopsRoute: DashboardMlopsRoute,
   DashboardPerformanceRoute: DashboardPerformanceRoute,
   DashboardPredictRoute: DashboardPredictRoute,
+  DashboardTrainRoute: DashboardTrainRoute,
+  DashboardUploadRoute: DashboardUploadRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -258,13 +321,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

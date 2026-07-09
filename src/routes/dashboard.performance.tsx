@@ -3,10 +3,10 @@ import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
   ReferenceLine, BarChart, Bar,
 } from "recharts";
-import { Activity, Award, Timer, Cpu } from "lucide-react";
-import { GlassCard, PageHeader } from "@/components/dashboard/shared";
-import { tooltipStyle } from "./dashboard.index";
-import { rocCurve, featureImportance, confusionMatrix } from "@/lib/mock-data";
+import { Activity, Award, Timer, Cpu, Loader2 } from "lucide-react";
+import { GlassCard, PageHeader, tooltipStyle } from "@/components/dashboard/shared";
+import { EmptyState, ErrorState } from "@/components/dashboard/empty-state";
+import { useMetrics, useFeatureImportance, useModelInfo } from "@/hooks/use-api";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/dashboard/performance")({
@@ -14,80 +14,51 @@ export const Route = createFileRoute("/dashboard/performance")({
   component: Perf,
 });
 
-const metrics = [
-  { label: "Accuracy", value: 94.2 },
-  { label: "Precision", value: 91.6 },
-  { label: "Recall", value: 88.4 },
-  { label: "F1 Score", value: 90.0 },
-];
-
 function Perf() {
+  const m = useMetrics();
+  const fi = useFeatureImportance();
+  const info = useModelInfo();
+
+  if (m.isLoading || info.isLoading) return <div className="flex items-center py-24 justify-center text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Loading…</div>;
+  if (m.isError) {
+    const msg = (m.error as Error).message;
+    if (msg.toLowerCase().includes("no trained")) return (
+      <><PageHeader title="Model Performance" icon={<Activity className="h-5 w-5"/>}/>
+      <EmptyState title="No trained model" message="Upload a dataset and train a model to see evaluation metrics." cta={{ to: "/dashboard/train", label: "Train model" }}/></>
+    );
+    return <ErrorState message={msg}/>;
+  }
+
+  const metrics = m.data!;
+  const kpis = [
+    { label: "Accuracy", value: metrics.accuracy },
+    { label: "Precision", value: metrics.precision },
+    { label: "Recall", value: metrics.recall },
+    { label: "F1 Score", value: metrics.f1 },
+  ];
+
   return (
     <>
-      <PageHeader
-        title="Model Performance"
-        description="Evaluation metrics, ROC curve, confusion matrix, and feature importance."
-        icon={<Activity className="h-5 w-5" />}
-      />
+      <PageHeader title="Model Performance" description="Evaluation metrics from your trained model." icon={<Activity className="h-5 w-5" />} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <GlassCard>
-          <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl gradient-primary text-primary-foreground shadow-elegant">
-              <Award className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Model</div>
-              <div className="text-base font-semibold">Random Forest</div>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard delay={0.05}>
-          <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-[#22C55E] to-[#059669] text-white shadow-elegant">
-              <Cpu className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Training Time</div>
-              <div className="text-base font-semibold">2m 18s</div>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard delay={0.1}>
-          <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#EAB308] text-white shadow-elegant">
-              <Timer className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Prediction Time</div>
-              <div className="text-base font-semibold">~42ms</div>
-            </div>
-          </div>
-        </GlassCard>
-        <GlassCard delay={0.15}>
-          <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] text-white shadow-elegant">
-              <Activity className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">AUC-ROC</div>
-              <div className="text-base font-semibold">0.94</div>
-            </div>
-          </div>
-        </GlassCard>
+        <Kpi icon={<Award className="h-5 w-5" />} label="Algorithm" value={info.data?.algorithm ?? "—"} />
+        <Kpi icon={<Cpu className="h-5 w-5" />} label="Training Time" value={info.data?.trainingTime ? `${info.data.trainingTime}s` : "—"} />
+        <Kpi icon={<Timer className="h-5 w-5" />} label="Predictions" value={info.data?.predictionCount?.toString() ?? "0"} />
+        <Kpi icon={<Activity className="h-5 w-5" />} label="AUC-ROC" value={metrics.rocAuc.toFixed(3)} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <GlassCard>
           <h3 className="mb-4 text-sm font-semibold">Evaluation Metrics</h3>
           <div className="space-y-4">
-            {metrics.map((m) => (
-              <div key={m.label}>
+            {kpis.map((k) => (
+              <div key={k.label}>
                 <div className="mb-1.5 flex items-center justify-between text-sm">
-                  <span>{m.label}</span>
-                  <span className="font-mono font-semibold gradient-text">{m.value}%</span>
+                  <span>{k.label}</span>
+                  <span className="font-mono font-semibold gradient-text">{k.value}%</span>
                 </div>
-                <Progress value={m.value} className="h-2" />
+                <Progress value={k.value} className="h-2" />
               </div>
             ))}
           </div>
@@ -97,16 +68,15 @@ function Perf() {
           <h3 className="mb-4 text-sm font-semibold">ROC Curve</h3>
           <div className="h-72">
             <ResponsiveContainer>
-              <LineChart data={rocCurve}>
+              <LineChart data={metrics.rocCurve}>
                 <defs>
                   <linearGradient id="rocG" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#2563EB"/>
-                    <stop offset="100%" stopColor="#7C3AED"/>
+                    <stop offset="0%" stopColor="#2563EB"/><stop offset="100%" stopColor="#7C3AED"/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)"/>
-                <XAxis dataKey="fpr" label={{ value: "False Positive Rate", position: "insideBottom", offset: -4, style: { fill: "var(--color-muted-foreground)", fontSize: 11 } }} tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}/>
-                <YAxis label={{ value: "True Positive Rate", angle: -90, position: "insideLeft", style: { fill: "var(--color-muted-foreground)", fontSize: 11 } }} tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}/>
+                <XAxis dataKey="fpr" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}/>
+                <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}/>
                 <Tooltip contentStyle={tooltipStyle()} />
                 <ReferenceLine segment={[{ x: 0, y: 0 }, { x: 1, y: 1 }]} stroke="var(--color-muted-foreground)" strokeDasharray="4 4"/>
                 <Line type="monotone" dataKey="tpr" stroke="url(#rocG)" strokeWidth={3} dot={false}/>
@@ -123,14 +93,12 @@ function Perf() {
             <div />
             <div className="text-muted-foreground py-2">Predicted Stay</div>
             <div className="text-muted-foreground py-2">Predicted Leave</div>
-
             <div className="text-muted-foreground self-center">Actual Stay</div>
-            <MatrixCell value={confusionMatrix.tn} label="True Negative" tone="success" />
-            <MatrixCell value={confusionMatrix.fp} label="False Positive" tone="warning" />
-
+            <MatrixCell value={metrics.confusionMatrix.tn} label="True Negative" tone="success" />
+            <MatrixCell value={metrics.confusionMatrix.fp} label="False Positive" tone="warning" />
             <div className="text-muted-foreground self-center">Actual Leave</div>
-            <MatrixCell value={confusionMatrix.fn} label="False Negative" tone="warning" />
-            <MatrixCell value={confusionMatrix.tp} label="True Positive" tone="success" />
+            <MatrixCell value={metrics.confusionMatrix.fn} label="False Negative" tone="warning" />
+            <MatrixCell value={metrics.confusionMatrix.tp} label="True Positive" tone="success" />
           </div>
         </GlassCard>
 
@@ -138,11 +106,10 @@ function Perf() {
           <h3 className="mb-4 text-sm font-semibold">Feature Importance</h3>
           <div className="h-72">
             <ResponsiveContainer>
-              <BarChart data={featureImportance} layout="vertical" barSize={16}>
+              <BarChart data={fi.data?.features.slice(0, 10) ?? []} layout="vertical" barSize={16}>
                 <defs>
                   <linearGradient id="fiG" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#2563EB"/>
-                    <stop offset="100%" stopColor="#7C3AED"/>
+                    <stop offset="0%" stopColor="#2563EB"/><stop offset="100%" stopColor="#7C3AED"/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" horizontal={false}/>
@@ -156,6 +123,20 @@ function Perf() {
         </GlassCard>
       </div>
     </>
+  );
+}
+
+function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <GlassCard>
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-xl gradient-primary text-primary-foreground shadow-elegant">{icon}</div>
+        <div>
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="text-base font-semibold">{value}</div>
+        </div>
+      </div>
+    </GlassCard>
   );
 }
 

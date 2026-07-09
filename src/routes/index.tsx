@@ -6,7 +6,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { landingStats } from "@/lib/mock-data";
+
+const landingStats = [
+  { label: "Explainable", value: "SHAP" },
+  { label: "Real-time", value: "APIs" },
+  { label: "Model Registry", value: "MLOps" },
+  { label: "Open Source", value: "FastAPI" },
+];
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -107,7 +113,7 @@ function Landing() {
       {/* Stats */}
       <section id="stats" className="border-y border-border bg-muted/30 py-16">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-4 sm:px-6 lg:grid-cols-4">
-          {landingStats.map((s, i) => (
+          {landingStats.map((s: { label: string; value: string }, i: number) => (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
