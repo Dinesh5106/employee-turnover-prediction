@@ -1,8 +1,9 @@
 // Typed fetch client + endpoint functions for the FastAPI backend.
-// Base URL configured via VITE_API_URL (falls back to http://localhost:8000).
+// Base URL configured via VITE_API_URL (defaults to the deployed Render backend).
 
-const BASE = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, "") ||
-  "http://localhost:8000";
+const DEFAULT_BASE = "https://employee-turnover-prediction-a2qq.onrender.com";
+const RAW_BASE = (import.meta.env.VITE_API_URL as string | undefined) || DEFAULT_BASE;
+const BASE = RAW_BASE.replace(/\/+$/, "");
 
 export class ApiError extends Error {
   status: number;
@@ -12,24 +13,63 @@ export class ApiError extends Error {
   }
 }
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Render free tier sleeps after inactivity; first request can take up to ~60s.
+// Retry network failures a few times with backoff to cover cold-starts.
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
-      ...(init?.headers || {}),
-    },
-  });
-  if (!res.ok) {
-    let msg = res.statusText;
+  const url = `${BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const attempts = 4;
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
     try {
-      const j = await res.json();
-      msg = j.detail || j.message || msg;
-    } catch { /* noop */ }
-    throw new ApiError(msg, res.status);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90_000);
+      let res: Response;
+      try {
+        res = await fetch(url, {
+          ...init,
+          signal: init?.signal ?? controller.signal,
+          headers: {
+            ...(init?.body && !(init.body instanceof FormData)
+              ? { "Content-Type": "application/json" }
+              : {}),
+            ...(init?.headers || {}),
+          },
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+      if (!res.ok) {
+        let msg = res.statusText;
+        try {
+          const j = await res.json();
+          msg = j.detail || j.message || msg;
+        } catch { /* noop */ }
+        // 502/503/504 during Render cold-start — retry
+        if ([502, 503, 504].includes(res.status) && i < attempts - 1) {
+          await sleep(2000 * (i + 1));
+          continue;
+        }
+        throw new ApiError(msg, res.status);
+      }
+      const ct = res.headers.get("content-type") || "";
+      return (ct.includes("application/json") ? await res.json() : (await res.text() as unknown)) as T;
+    } catch (e) {
+      lastErr = e;
+      if (e instanceof ApiError) throw e;
+      // Network / abort — likely cold start. Retry with backoff.
+      if (i < attempts - 1) {
+        await sleep(2000 * (i + 1));
+        continue;
+      }
+    }
   }
-  const ct = res.headers.get("content-type") || "";
-  return (ct.includes("application/json") ? await res.json() : (await res.text() as unknown)) as T;
+  const msg = lastErr instanceof Error ? lastErr.message : "Network error";
+  throw new ApiError(
+    `Unable to reach the backend (${msg}). The server may be waking up — please retry in a few seconds.`,
+    0,
+  );
 }
 
 // ---------- Types
