@@ -35,7 +35,13 @@ function UploadPage() {
 
   const info = upload.data?.info;
   const validation = upload.data?.validation ?? [];
-  const allValid = validation.length > 0 && validation.every((v) => v.passed);
+  // Only block processing on critical failures (target column missing).
+  // Non-critical warnings (schema mismatch, duplicates) should not disable the button —
+  // the backend handles those gracefully.
+  const criticalFail = validation.some(
+    (v) => !v.passed && v.name === "Target column exists",
+  );
+  const canProcess = !!info && !criticalFail;
 
   return (
     <>
@@ -104,7 +110,7 @@ function UploadPage() {
               <Download className="h-4 w-4" /> Download dataset
             </a>
             <div className="flex gap-2">
-              <Button disabled={!allValid || process.isPending} onClick={() => process.mutate()}
+              <Button disabled={!canProcess || process.isPending} onClick={() => process.mutate()}
                 className="gradient-primary text-primary-foreground shadow-elegant hover:opacity-90">
                 {process.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Processing…</> : "Process Dataset"}
               </Button>
