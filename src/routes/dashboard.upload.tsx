@@ -35,7 +35,13 @@ function UploadPage() {
 
   const info = upload.data?.info;
   const validation = upload.data?.validation ?? [];
-  const allValid = validation.length > 0 && validation.every((v) => v.passed);
+  // Only block processing on critical failures (target column missing).
+  // Non-critical warnings (schema mismatch, duplicates) should not disable the button —
+  // the backend handles those gracefully.
+  const criticalFail = validation.some(
+    (v) => !v.passed && v.name === "Target column exists",
+  );
+  const canProcess = !!info && !criticalFail;
 
   return (
     <>
