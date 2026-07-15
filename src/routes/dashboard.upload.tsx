@@ -110,7 +110,7 @@ function UploadPage() {
               <Download className="h-4 w-4" /> Download dataset
             </a>
             <div className="flex gap-2">
-              <Button disabled={!allValid || process.isPending} onClick={() => process.mutate()}
+              <Button disabled={!canProcess || process.isPending} onClick={() => process.mutate()}
                 className="gradient-primary text-primary-foreground shadow-elegant hover:opacity-90">
                 {process.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/>Processing…</> : "Process Dataset"}
               </Button>
